@@ -8,9 +8,31 @@
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
 
-struct DataPackage {
-	int age;
-	char name[32];
+enum CMD {
+	CMD_LOGIN,
+	CMD_LOGOUT,
+	CMD_ERROR
+};
+//æ•°æ®åŒ…å¤´
+struct DataHeader {
+	short dataLength;//æ•°æ®é•¿åº¦
+	short cmd;
+};
+//æ•°æ®åŒ…ä½“
+struct Login {
+	char userName[32];
+	char PassWord[32];
+};
+struct LoginResult {
+	int result;
+
+};
+
+struct Logout {
+	char userName[32];
+};
+struct LogoutResult {
+	int result;
 };
 
 int main() {
@@ -20,17 +42,17 @@ int main() {
 
 	//1.build a socket
 	SOCKET _sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	//2.Á¬½Ó·şÎñÆ÷
+	//2.è¿æ¥æœåŠ¡å™¨
 	sockaddr_in _sin = {};
 	_sin.sin_family = AF_INET;
 	_sin.sin_port = htons(4567);
 	_sin.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
 	int ret = connect(_sock, (sockaddr*)&_sin, sizeof(sockaddr_in));
 	if (SOCKET_ERROR == ret) {
-		cout << "Error, Á¬½Ó·şÎñÆ÷Ê§°Ü..." << endl;
+		cout << "Error, è¿æ¥æœåŠ¡å™¨å¤±è´¥..." << endl;
 	}
 	else {
-		cout << "Success Á¬½Ó·şÎñÆ÷³É¹¦..." << endl;
+		cout << "Success è¿æ¥æœåŠ¡å™¨æˆåŠŸ..." << endl;
 	}
 
 	char _recvBuf[128] = {};
@@ -40,18 +62,34 @@ int main() {
 		scanf_s("%s", cmdBuf, 128);
 		//4
 		if (0 == strcmp(cmdBuf, "exit")) {
-			cout << "ÊÕµ½exitÃüÁî£¬½áÊø";
+			cout << "æ”¶åˆ°exitå‘½ä»¤ï¼Œç»“æŸ";
 			break;
 		}
-		else {
-			send(_sock, cmdBuf, strlen(cmdBuf) + 1, 0);
+		else if(0 == strcmp(cmdBuf, "login")){
+			Login login = { "Ada","123456" };
+			DataHeader dh = { sizeof(login),CMD_LOGIN };
+			send(_sock, (const char*)&dh, sizeof(dh), 0);
+			send(_sock, (const char*)&login, sizeof(login), 0);
+			//æ¥æ”¶æœåŠ¡å™¨è¿”å›æ•°æ®
+			DataHeader retHeader = {};
+			LoginResult loginRet = {};
+			recv(_sock, (char*)&retHeader, sizeof(retHeader), 0);
+			recv(_sock, (char*)&loginRet, sizeof(loginRet), 0);
+			printf("LoginReusltï¼š%d \n", loginRet.result);
 		}
-		//5.´¦ÀíÇëÇó
-		char recvBuf[128] = {};
-		int nlen = recv(_sock, recvBuf, 128, 0);
-		if (nlen > 0) {
-			DataPackage* dp = (DataPackage*)recvBuf;
-			cout << "ÄêÁä = " << dp->age << " ĞÕÃû = " << dp->name << endl;
+		else if (0 == strcmp(cmdBuf, "logout")) {
+			Logout logout = {};
+			DataHeader dh = { sizeof(logout), CMD_LOGOUT };
+			send(_sock, (const char*)&dh, sizeof(dh), 0);
+			send(_sock, (const char*)&logout, sizeof(logout), 0);
+			DataHeader retHeader = {};
+			LogoutResult logoutRet = {};
+			recv(_sock, (char*)&retHeader, sizeof(retHeader), 0);
+			recv(_sock, (char*)&logoutRet, sizeof(logoutRet), 0);
+			printf("LogoutReusltï¼š%d \n", logoutRet.result);
+		}
+		else {
+			printf("è¾“å…¥æœ‰é—®é¢˜");
 		}
 	}
 	//7
