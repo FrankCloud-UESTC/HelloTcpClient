@@ -7,16 +7,16 @@
 using namespace std;
 
 enum CMD {
-	CMD_LOGININ,
-	CMD_LOGINOUT,
+	CMD_LOGIN,
+	CMD_LOGOUT,
 	CMD_ERROR
 };
-//Êı¾İ°üÍ·
+//æ•°æ®åŒ…å¤´
 struct DataHeader {
-	short dataLength;//Êı¾İ³¤¶È
+	short dataLength;//æ•°æ®é•¿åº¦
 	short cmd;
 };
-//Êı¾İ°üÌå
+//æ•°æ®åŒ…ä½“
 struct Login {
 	char userName[32];
 	char PassWord[32];
@@ -29,7 +29,7 @@ struct LoginResult {
 struct Logout {
 	char userName[32];
 };
-struct LoginoutResult {
+struct LogoutResult {
 	int result;
 };
 
@@ -40,7 +40,7 @@ int main() {
 
 	//1.build a socket
 	SOCKET _sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	//2.bind °ó¶¨ÓÃÓÚ½ÓÊÜ¿Í»§¶ËÁ¬½ÓµÄÍøÂç¶Ë¿Ú
+	//2.bind ç»‘å®šç”¨äºæ¥å—å®¢æˆ·ç«¯è¿æ¥çš„ç½‘ç»œç«¯å£
 	sockaddr_in _sin = {};
 	_sin.sin_family = AF_INET;
 	_sin.sin_port = htons(4567);
@@ -49,14 +49,14 @@ int main() {
 		cout << "Error, fail to bind network port..." << endl;
 	}
 	else {
-		cout << "³É¹¦°ó¶¨ÍøÂç¶Ë¿Ú..." << endl;
+		cout << "æˆåŠŸç»‘å®šç½‘ç»œç«¯å£..." << endl;
 	}
-	//3.listen ¼àÌıÍøÂç¶Ë¿Ú
+	//3.listen ç›‘å¬ç½‘ç»œç«¯å£
 	if (SOCKET_ERROR == listen(_sock, 5)) {
 		cout << "Fail to listen network port..." << endl;
 	}
 	else {
-		cout << "³É¹¦¼àÌıÍøÂç¶Ë¿Ú..." << endl;
+		cout << "æˆåŠŸç›‘å¬ç½‘ç»œç«¯å£..." << endl;
 	}
 	//4.accept
 	sockaddr_in clientAddr = {};
@@ -65,23 +65,23 @@ int main() {
 
 	_cSock = accept(_sock, (sockaddr*)&clientAddr, &nAddrLen);
 	if (INVALID_SOCKET == _cSock) {
-		cout << "´íÎó, ½ÓÊÕµ½ÎŞĞ§¿Í»§¶ËSOCKET..." << endl;
+		cout << "é”™è¯¯, æ¥æ”¶åˆ°æ— æ•ˆå®¢æˆ·ç«¯SOCKET..." << endl;
 	}
 	else {
-		cout << "ĞÂ¿Í»§¶Ë¼ÓÈë£ºsocket = " << (int)_cSock <<endl;
+		cout << "æ–°å®¢æˆ·ç«¯åŠ å…¥ï¼šsocket = " << (int)_cSock <<endl;
 	}
 	//char _recvBuf[128] = {};
 	while (true) {
 		DataHeader header = {};
-		//5.½ÓÊÕ¿Í»§¶ËÊı¾İ
+		//5.æ¥æ”¶å®¢æˆ·ç«¯æ•°æ®
 		int nLen = recv(_cSock, (char*)&header, sizeof(header), 0);
 		if (nLen <= 0) {
-			cout << "¿Í»§¶ËÒÑ¾­ÍË³ö£¬½áÊø";
+			cout << "å®¢æˆ·ç«¯å·²ç»é€€å‡ºï¼Œç»“æŸ";
 			break;
 		}
-		cout << "ÊÕµ½ÃüÁî£º" << header.cmd << "ÃüÁî³¤¶È£º" << header.dataLength << endl;
+		cout << "æ”¶åˆ°å‘½ä»¤ï¼š" << header.cmd << " å‘½ä»¤é•¿åº¦ï¼š" << header.dataLength << endl;
 		switch (header.cmd) {
-			case CMD_LOGININ: {
+			case CMD_LOGIN: {
 				Login login = {};
 				recv(_cSock, (char*)&header, sizeof(Login), 0);
 				LoginResult ret = { 0 };
@@ -89,10 +89,10 @@ int main() {
 				send(_cSock, (char*)&ret, sizeof(LoginResult), 0);
 			}
 							break;
-			case CMD_LOGINOUT: {
+			case CMD_LOGOUT: {
 				Logout logout = {};
 				recv(_cSock, (char*)&header, sizeof(logout), 0);
-				LoginResult ret = { 0 };
+				LogoutResult ret = { 0 };
 				send(_cSock, (char*)&header, sizeof(header), 0);
 				send(_cSock, (char*)&ret, sizeof(ret), 0);
 			}
@@ -106,7 +106,7 @@ int main() {
 		
 	}
 
-	//7¹Ø±Õsocket
+	//7å…³é—­socket
 	closesocket(_sock);
 	WSACleanup();
 	getchar();
