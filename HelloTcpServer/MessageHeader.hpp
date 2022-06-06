@@ -1,15 +1,6 @@
-﻿#define WIN32_LEAN_AND_MEAN
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-
-#include<windows.h>
-#include<WinSock2.h>
-#include<stdio.h>
-#include<iostream>
-#include<vector>
-#include"EasyTcpServer.hpp"
-#pragma comment(lib, "ws2_32.lib")
-using namespace std;
-
+#ifndef _MessageHeader_
+#define _MessageHeader_
+#endif // !_EasyTcpClient_hpp_
 enum CMD {
 	CMD_LOGIN,
 	CMD_LOGIN_RESULT,
@@ -18,13 +9,12 @@ enum CMD {
 	CMD_NEW_USER_JOIN,
 	CMD_ERROR
 };
-//数据包头
+//���ݰ�ͷ
 struct DataHeader {
-	short dataLength;//数据长度
-	//short MaxLength;
+	short dataLength;//���ݳ���
 	short cmd;
 };
-//数据包体
+//���ݰ���
 struct Login : public DataHeader {
 	Login() {
 		dataLength = sizeof(Login);
@@ -59,32 +49,9 @@ struct LogoutResult : public DataHeader {
 };
 struct NewUserJoin : public DataHeader {
 	NewUserJoin() {
-		dataLength = sizeof(LogoutResult);
+		dataLength = sizeof(NewUserJoin);
 		cmd = CMD_NEW_USER_JOIN;
 		scok = 0;
 	}
 	int scok;
 };
-vector<SOCKET> g_clients;
-
-
-int main() {
-	
-
-	//1.build a socket
-	
-	//2.bind 绑定用于接受客户端连接的网络端口
-	
-	//3.listen 监听网络端口
-	
-
-	//char _recvBuf[128] = {};
-	while (true) {
-		
-		
-
-	}
-
-	getchar();
-	return 0;
-}
