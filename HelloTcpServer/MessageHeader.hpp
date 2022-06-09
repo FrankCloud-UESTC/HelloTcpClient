@@ -1,6 +1,6 @@
 #ifndef _MessageHeader_
 #define _MessageHeader_
-#endif // !_EasyTcpClient_hpp_
+
 enum CMD {
 	CMD_LOGIN,
 	CMD_LOGIN_RESULT,
@@ -11,6 +11,10 @@ enum CMD {
 };
 //数据包头
 struct DataHeader {
+	DataHeader() {
+		dataLength = sizeof(DataHeader);
+		cmd = CMD_ERROR;
+	}
 	short dataLength;//数据长度
 	short cmd;
 };
@@ -22,6 +26,7 @@ struct Login : public DataHeader {
 	}
 	char userName[32];
 	char PassWord[32];
+	char data[932];
 };
 struct LoginResult : public DataHeader {
 	LoginResult() {
@@ -30,6 +35,7 @@ struct LoginResult : public DataHeader {
 		result = 0;
 	}
 	int result;
+	char data[992];
 };
 
 struct Logout : public DataHeader {
@@ -55,3 +61,4 @@ struct NewUserJoin : public DataHeader {
 	}
 	int scok;
 };
+#endif // !_EasyTcpClient_hpp_
